@@ -2,6 +2,7 @@ const axios = require("axios");
 const bcrypt = require("bcryptjs");
 
 const { authenticate, generateToken } = require("../auth/authenticate");
+const Users = require("./helpers.js");
 
 module.exports = server => {
   server.post("/api/register", register);
@@ -11,9 +12,18 @@ module.exports = server => {
 
 function register(req, res) {
   // implement user registration
-  const user = req.body;
-  const hash = bcrypt.hashSync(user.password, 12); //hashed 2^12th times
+
+  const hash = bcrypt.hashSync(user.password, 14);
   user.password = hash;
+
+  Users.add(req.body)
+    .then(newUser => {
+      res.status(201).json(newUser);
+    })
+    .catch(err => {
+      console.log("register", err);
+      res.status(500).json({ message: "Error registering user" });
+    });
 }
 
 function login(req, res) {
